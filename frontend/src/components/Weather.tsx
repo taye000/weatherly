@@ -46,8 +46,15 @@ const Weather = () => {
 
     // Function to format Unix timestamp
     const formatDate = (timestamp: number): string => {
-        const date = new Date(timestamp * 1000); // Convert to milliseconds
+        const date = new Date(timestamp * 1000);
         const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('en-UK', options);
+    };
+
+    // format date without year
+    const formatDateWithoutYear = (timestamp: number): string => {
+        const date = new Date(timestamp * 1000);
+        const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' };
         return date.toLocaleDateString('en-UK', options);
     };
 
@@ -64,7 +71,7 @@ const Weather = () => {
                             src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
                             alt={weather.weather[0].description}
                         />
-                        <p className="text-xl font-semibold">{weather.main.temp}° {unit === 'metric' ? 'C' : 'F'}</p>
+                        <p className="text-xl font-semibold text-gray-400">{weather.main.temp}° {unit === 'metric' ? 'C' : 'F'}</p>
                         <div className="mt-4">
                             <p className="text-lg text-gray-600 mb-2">{weather.weather[0].description}</p>
                         </div>
@@ -93,20 +100,33 @@ const Weather = () => {
 
                 {/* Weather Info for Next Days */}
                 <div>
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">Next 3 Days</h2>
-                    {/* Replace the below div with actual data for the next 3 days */}
-                    {weather && forecast && forecast.slice(0, 3).map((day, index) => (
-                        <div key={index} className="flex justify-between bg-white p-4 rounded-md shadow mb-4">
-                            <div>
-                                <p className="text-lg font-semibold">{formatDate(day.dt)}</p>
-                                <p className="text-gray-600">{day.weather[0].description}</p>
+                    <div className="flex justify-between">
+                        {weather && forecast && forecast.slice(0, 3).map((day, index) => (
+                            <div key={index} className="bg-white p-4 rounded-md shadow mx-2 flex-1">
+                                <p className="text-lg font-semibold text-gray-800">{day.temp.min}° - {day.temp.max}° {unit === 'metric' ? 'C' : 'F'}</p>
+                                <img
+                                    src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
+                                    alt={day.weather[0].description}
+                                    className="w-12 h-12"
+                                />
+                                <p className="text-lg font-semibold text-gray-300">{formatDateWithoutYear(day.dt)}</p>
                             </div>
-                            <div>
-                                <p className="text-lg font-semibold">{day.temp.min}° - {day.temp.max}° {unit === 'metric' ? 'C' : 'F'}</p>
-                                <img src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`} alt={day.weather[0].description} />
-                            </div>
+                        ))}
+                    </div>
+                    {/* Humidity and Wind Information */}
+                    <div className="flex justify-between mt-4">
+                        {/* Humidity Card */}
+                        <div className="bg-white p-4 rounded-md shadow flex-1 mx-2 text-center">
+                            <h3 className="text-lg font-bold text-gray-300">Humidity</h3>
+                            <p className="text-xl font-semibold text-gray-800">{weather ? weather.main.humidity : 0}%</p>
                         </div>
-                    ))}
+
+                        {/* Wind Card */}
+                        <div className="bg-white p-4 rounded-md shadow flex-1 mx-2 text-center">
+                            <h3 className="text-lg font-bold">Wind</h3>
+                            <p className="text-xl font-semibold text-gray-800">{weather ? weather.wind.speed : 0} m/s</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
