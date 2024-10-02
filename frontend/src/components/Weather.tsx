@@ -1,6 +1,6 @@
 "use client"
 import { WeatherData } from '@/@types/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const Weather = () => {
     const [city, setCity] = useState('Nairobi');
@@ -27,8 +27,13 @@ const Weather = () => {
                 console.log(err);
                 setError('An error occurred while fetching weather data.');
             })
-            .finally(() => setLoading(false)); 
+            .finally(() => setLoading(false));
     };
+
+    // useEffect to fetch weather data on component mount
+    useEffect(() => {
+        fetchWeather();
+    }, []);
 
     const handleUnitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUnit(e.target.value);
