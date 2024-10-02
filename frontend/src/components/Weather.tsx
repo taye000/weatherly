@@ -22,17 +22,14 @@ const Weather = () => {
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                placeholder="Enter city"
-                className="w-full p-2 mb-4 border border-gray-300 rounded-md"
+                placeholder="Search city"
+                className="p-2 mb-4 border border-gray-300 rounded-md"
             />
-            <select
-                onChange={handleUnitChange}
-                value={unit}
-                className="w-full p-2 mb-4 border border-gray-300 rounded-md"
-            >
-                <option value="metric">Celsius</option>
-                <option value="imperial">Fahrenheit</option>
-            </select>
+            <button className="btn">Go</button>
+            <div className="btn-group btn-group-scrollable">
+                <input type="radio" name="options" data-content="°C" className="btn" />
+                <input type="radio" name="options" data-content="°F" className="btn" />
+            </div>
 
             {weather && (
                 <div>
