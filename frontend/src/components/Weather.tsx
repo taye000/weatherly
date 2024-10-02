@@ -1,19 +1,41 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { WeatherData } from '@/@types/types';
+import { useState } from 'react';
 
 const Weather = () => {
     const [city, setCity] = useState('Nairobi');
-    const [weather, setWeather] = useState(fakeWeatherData);
+    const [weather, setWeather] = useState<WeatherData | null>(null);
     const [unit, setUnit] = useState('metric');
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
-    // useEffect(() => {
-    //     fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/weather?city=${city}&unit=${unit}`)
-    //         .then(res => res.json())
-    //         .then(data => setWeather(data));
-    // }, [city, unit]);
+    const fetchWeather = () => {
+        setLoading(true);
+        setError(null);
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/weather?city=${city}&unit=${unit}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                if (data.message === 'success') {
+                    setWeather(data.data);
+                } else {
+                    setError(data.error);
+                    setWeather(null);
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                setError('An error occurred while fetching weather data.');
+            })
+            .finally(() => setLoading(false)); 
+    };
 
-    const handleUnitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleUnitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUnit(e.target.value);
+    };
+
+    const handleSearch = () => {
+        fetchWeather();
     };
 
     return (
@@ -25,12 +47,17 @@ const Weather = () => {
                 placeholder="Search city"
                 className="p-2 mb-4 border border-gray-300 rounded-md"
             />
-            <button className="btn">Go</button>
+            <button className="btn" onClick={handleSearch}>Go</button>
             <div className="btn-group btn-group-scrollable">
-                <input type="radio" name="options" data-content="°C" className="btn" />
-                <input type="radio" name="options" data-content="°F" className="btn" />
+                <input type="radio" name="unit" value="metric" checked={unit === 'metric'} onChange={handleUnitChange} data-content="°C" className="btn" />
+                <input type="radio" name="unit" value="imperial" checked={unit === 'imperial'} onChange={handleUnitChange} data-content="°F" className="btn" />
             </div>
 
+            {/* Error Handling */}
+            {error && <p className="text-red-500">{error}</p>}
+            {loading && <p>Loading...</p>}
+
+            {/* Weather Info */}
             {weather && (
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">{weather.name}</h2>
@@ -47,16 +74,3 @@ const Weather = () => {
 };
 
 export default Weather;
-
-
-const fakeWeatherData = {
-    name: "Nairobi",
-    weather: [{ description: "clear sky", icon: "01d" }],
-    main: {
-        temp: 25,
-        humidity: 65,
-    },
-    wind: {
-        speed: 3.5,
-    },
-};
