@@ -25,20 +25,57 @@ class WeatherController extends Controller
         }
 
         $url = "https://api.openweathermap.org/data/2.5/forecast";
+        $geocodingUrl = "http://api.openweathermap.org/geo/1.0/direct";
 
         // Get query parameters default to Nairobi for city and Celsius for unit
         $city = $request->input('city') ?? 'Nairobi';
         $unit = $request->input('unit') ?? 'metric';
 
+        // Log the parameters used in the request to the Geocoding API
+        Log::info('Fetching coordinates for city:', ['city' => $city]);
+
+        // Request to Geocoding API
+        $geoResponse = Http::get($geocodingUrl, [
+            'q' => $city,
+            'limit' => 1,
+            'appid' => $apiKey,
+        ]);
+
+        // Handle Geocoding API errors
+        if ($geoResponse->failed()) {
+            Log::error('Failed request to Geocoding API:', [
+                'status' => $geoResponse->status(),
+                'response' => $geoResponse->json(),
+            ]);
+            return response()->json([
+                'message' => 'failed',
+                'error' => 'Could not retrieve coordinates for the specified city',
+            ], $geoResponse->status());
+        }
+
+        // Extract coordinates from the geocoding response
+        $geoData = $geoResponse->json();
+        if (empty($geoData)) {
+            return response()->json([
+                'message' => 'failed',
+                'error' => 'City not found',
+            ], 404);
+        }
+
+        $lat = $geoData[0]['lat'];
+        $lon = $geoData[0]['lon'];
+
         // Log the actual parameters used in the request to OpenWeatherMap
         Log::info('Making request to OpenWeatherMap API:', [
-            'city' => $city,
+            'lat' => $lat,
+            'lon' => $lon,
             'unit' => $unit,
         ]);
 
         // Make the request to API
         $response = Http::get($url, [
-            'q' => $city,
+            'lat' => $lat,
+            'lon' => $lon,
             'units' => $unit,  // 'metric' for Celsius, 'imperial' for Fahrenheit
             'cnt' => 4, // Get 3 days of forecast
             'APPID' => $apiKey
@@ -48,7 +85,7 @@ class WeatherController extends Controller
         if ($response->failed()) {
             $status = $response->status();
             $errorMessage = match ($status) {
-                404 => 'City not found',
+                404 => 'Weather data not found',
                 401 => 'Invalid API key',
                 default => 'An error occurred',
             };
