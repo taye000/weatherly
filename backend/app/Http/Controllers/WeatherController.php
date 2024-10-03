@@ -77,7 +77,7 @@ class WeatherController extends Controller
             'lat' => $lat,
             'lon' => $lon,
             'units' => $unit,  // 'metric' for Celsius, 'imperial' for Fahrenheit
-            'cnt' => 4, // Get 3 days of forecast
+            'cnt' => 4, // Get 4 days of forecast
             'APPID' => $apiKey
         ]);
 
@@ -114,7 +114,7 @@ class WeatherController extends Controller
         return response()->json([
             'message' => 'success',
             'data' => [
-                'forecast' => $response->json()['list'], // Get the daily forecast
+                'forecast' => $response->json()['list'],
             ],
         ]);
     }
