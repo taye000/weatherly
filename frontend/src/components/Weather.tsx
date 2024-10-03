@@ -2,6 +2,7 @@
 import { WeatherData } from '@/@types/types';
 import { useEffect, useState } from 'react';
 import LoadingSpinner from './Loading';
+import feather from 'feather-icons';
 
 const Weather = () => {
     const [city, setCity] = useState('Nairobi');
@@ -34,7 +35,11 @@ const Weather = () => {
     // useEffect to fetch weather data on component mount
     useEffect(() => {
         fetchWeather();
-    }, []);
+    }, [unit]);
+
+    useEffect(() => {
+        feather.replace(); // Replaces all feather icons with the SVG versions
+    }, [weather]);
 
     const handleUnitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUnit(e.target.value);
@@ -66,7 +71,6 @@ const Weather = () => {
                 {error && <p className="text-red-500">{error}</p>}
                 {weather && (
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">{weather.name}</h2>
                         <img
                             src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
                             alt={weather.weather[0].description}
@@ -77,6 +81,7 @@ const Weather = () => {
                         </div>
                         {/* Display Current Date and Time */}
                         <p className="text-gray-600 mt-4">{formatDate(weather.dt)}</p>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">{weather.name}</h2>
                     </div>
                 )}
             </div>
@@ -109,7 +114,7 @@ const Weather = () => {
                                     alt={day.weather[0].description}
                                     className="w-12 h-12"
                                 />
-                                <p className="text-lg font-semibold text-gray-300">{formatDateWithoutYear(day.dt)}</p>
+                                <p className="text-lg font-semibold text-gray-400">{formatDateWithoutYear(day.dt)}</p>
                             </div>
                         ))}
                     </div>
@@ -117,14 +122,20 @@ const Weather = () => {
                     <div className="flex justify-between mt-4">
                         {/* Humidity Card */}
                         <div className="bg-white p-4 rounded-md shadow flex-1 mx-2 text-center">
-                            <h3 className="text-lg font-bold text-gray-300">Humidity</h3>
-                            <p className="text-xl font-semibold text-gray-800">{weather ? weather.main.humidity : 0}%</p>
+                            <h3 className="text-lg font-bold text-gray-400">Humidity</h3>
+                            <i data-feather="droplet" className="w-8 h-8 mx-auto text-blue-500"></i>
+                            <p className="text-xl font-semibold text-gray-800 mt-2">
+                                {weather ? weather.main.humidity : 0}%
+                            </p>
                         </div>
 
                         {/* Wind Card */}
                         <div className="bg-white p-4 rounded-md shadow flex-1 mx-2 text-center">
-                            <h3 className="text-lg font-bold">Wind</h3>
-                            <p className="text-xl font-semibold text-gray-800">{weather ? weather.wind.speed : 0} m/s</p>
+                            <h3 className="text-lg font-bold text-gray-400">Wind</h3>
+                            <i data-feather="wind" className="w-8 h-8 mx-auto text-gray-500"></i>
+                            <p className="text-xl font-semibold text-gray-800 mt-2">
+                                {weather ? weather.wind.speed : 0} m/s
+                            </p>
                         </div>
                     </div>
                 </div>
