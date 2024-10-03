@@ -49,6 +49,13 @@ const Weather = () => {
         fetchWeather();
     };
 
+    // Handle Enter key press to Call handleSearch if pressed
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
     // Function to format Unix timestamp
     const formatDate = (timestamp: number): string => {
         const date = new Date(timestamp * 1000);
@@ -93,6 +100,7 @@ const Weather = () => {
                         type="text"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         placeholder="Search city"
                         className="p-2 border border-gray-300 rounded-md flex-grow"
                     />
