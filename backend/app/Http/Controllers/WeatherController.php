@@ -24,7 +24,7 @@ class WeatherController extends Controller
             ], 500);
         }
 
-        $url = "https://api.openweathermap.org/data/2.5/weather";
+        $url = "https://api.openweathermap.org/data/2.5/forecast";
 
         // Get query parameters default to Nairobi for city and Celsius for unit
         $city = $request->input('city') ?? 'Nairobi';
@@ -40,6 +40,7 @@ class WeatherController extends Controller
         $response = Http::get($url, [
             'q' => $city,
             'units' => $unit,  // 'metric' for Celsius, 'imperial' for Fahrenheit
+            'cnt' => 4, // Get 3 days of forecast
             'APPID' => $apiKey
         ]);
 
@@ -67,15 +68,17 @@ class WeatherController extends Controller
             ], $status);
         }
 
-        // Log successful API response
+        // Log successful API responses
         Log::info('Successful response from OpenWeatherMap API:', [
-            'data' => $response->json(),
+            'forecast_data' => $response->json(),
         ]);
 
-        // Return success message and data
+        // Return success message and data including forecast
         return response()->json([
             'message' => 'success',
-            'data' => $response->json(),
+            'data' => [
+                'forecast' => $response->json()['list'], // Get the daily forecast
+            ],
         ]);
     }
 }

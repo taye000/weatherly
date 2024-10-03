@@ -1,12 +1,12 @@
 "use client"
-import { WeatherData } from '@/@types/types';
+import { ForecastData } from '@/@types/types';
 import { useEffect, useState } from 'react';
 import LoadingSpinner from './Loading';
 import feather from 'feather-icons';
 
 const Weather = () => {
     const [city, setCity] = useState('Nairobi');
-    const [weather, setWeather] = useState<WeatherData | null>(null);
+    const [weather, setWeather] = useState<ForecastData | null>(null);
     const [unit, setUnit] = useState('metric');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -19,6 +19,7 @@ const Weather = () => {
             .then(data => {
                 console.log(data);
                 if (data.message === 'success') {
+                    console.log("datafetched", data.data);
                     setWeather(data.data);
                 } else {
                     setError(data.error);
@@ -72,23 +73,23 @@ const Weather = () => {
 
     return (
         <div className="bg-gray-100 p-4 rounded-lg shadow-md flex">
-            {/* Left Section for Current Day's Weather */}
+            {/* Section for Current Day's Weather */}
             <div className="w-1/4 p-4 border-r border-gray-300">
                 {loading && <LoadingSpinner />}
                 {error && <p className="text-red-500">{error}</p>}
-                {weather && (
+                {weather && weather.forecast.length > 0 && (
                     <div>
                         <img
-                            src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
-                            alt={weather.weather[0].description}
+                            src={`https://openweathermap.org/img/wn/${weather.forecast[0].weather[0].icon}@2x.png`}
+                            alt={weather.forecast[0].weather[0].description}
                         />
-                        <p className="text-xl font-semibold text-gray-400">{weather.main.temp}° {unit === 'metric' ? 'C' : 'F'}</p>
+                        <p className="text-xl font-semibold text-gray-400">{weather.forecast[0].main.temp}° {unit === 'metric' ? 'C' : 'F'}</p>
                         <div className="mt-4">
-                            <p className="text-lg text-gray-600 mb-2">{weather.weather[0].description}</p>
+                            <p className="text-lg text-gray-600 mb-2">{weather.forecast[0].weather[0].description}</p>
                         </div>
                         {/* Display Current Date and Time */}
-                        <p className="text-gray-600 mt-4">{formatDate(weather.dt)}</p>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">{weather.name}</h2>
+                        <p className="text-gray-600 mt-4">{formatDate(weather.forecast[0].dt)}</p>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">{city}</h2> {/* Use the city name directly */}
                     </div>
                 )}
             </div>
@@ -114,9 +115,9 @@ const Weather = () => {
                 {/* Weather Info for Next Days */}
                 <div>
                     <div className="flex justify-between">
-                        {weather && forecast && forecast.slice(0, 3).map((day, index) => (
+                        {weather && weather.forecast.length > 0 && weather.forecast.slice(1, 4).map((day, index) => ( // Skip the current day (index 0)
                             <div key={index} className="bg-white p-4 rounded-md shadow mx-2 flex-1">
-                                <p className="text-lg font-semibold text-gray-800">{day.temp.min}° - {day.temp.max}° {unit === 'metric' ? 'C' : 'F'}</p>
+                                <p className="text-lg font-semibold text-gray-800">{day.main.temp_min}° - {day.main.temp_max}° {unit === 'metric' ? 'C' : 'F'}</p>
                                 <img
                                     src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
                                     alt={day.weather[0].description}
@@ -126,6 +127,7 @@ const Weather = () => {
                             </div>
                         ))}
                     </div>
+
                     {/* Humidity and Wind Information */}
                     <div className="flex justify-between mt-4">
                         {/* Humidity Card */}
@@ -133,7 +135,7 @@ const Weather = () => {
                             <h3 className="text-lg font-bold text-gray-400">Humidity</h3>
                             <i data-feather="droplet" className="w-8 h-8 mx-auto text-blue-500"></i>
                             <p className="text-xl font-semibold text-gray-800 mt-2">
-                                {weather ? weather.main.humidity : 0}%
+                                {weather && weather.forecast.length > 0 ? weather.forecast[0].main.humidity : 0}%
                             </p>
                         </div>
 
@@ -142,7 +144,7 @@ const Weather = () => {
                             <h3 className="text-lg font-bold text-gray-400">Wind</h3>
                             <i data-feather="wind" className="w-8 h-8 mx-auto text-gray-500"></i>
                             <p className="text-xl font-semibold text-gray-800 mt-2">
-                                {weather ? weather.wind.speed : 0} m/s
+                                {weather && weather.forecast.length > 0 ? weather.forecast[0].wind.speed : 0} m/s
                             </p>
                         </div>
                     </div>
@@ -153,50 +155,3 @@ const Weather = () => {
 };
 
 export default Weather;
-
-
-const forecast = [{
-    "dt": 1727985725,
-    "temp": {
-        "min": 17.0,
-        "max": 22.0
-    },
-    "weather": [
-        {
-            "id": 802,
-            "main": "Clouds",
-            "description": "scattered clouds",
-            "icon": "02d"
-        }
-    ]
-},
-{
-    "dt": 1728072125,
-    "temp": {
-        "min": 18.0,
-        "max": 23.0
-    },
-    "weather": [
-        {
-            "id": 800,
-            "main": "Clear",
-            "description": "clear sky",
-            "icon": "01d"
-        }
-    ]
-},
-{
-    "dt": 1728158525,
-    "temp": {
-        "min": 19.0,
-        "max": 24.0
-    },
-    "weather": [
-        {
-            "id": 501,
-            "main": "Rain",
-            "description": "light rain",
-            "icon": "10d"
-        }
-    ]
-}]
